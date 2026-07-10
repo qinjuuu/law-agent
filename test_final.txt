@@ -1,0 +1,181 @@
+﻿============================================================
+娑堣垂缁存潈鏅鸿兘鍔╂墜 - 缁煎悎娴嬭瘯濂椾欢
+============================================================
+
+[1] 閰嶇疆妯″潡娴嬭瘯
+python : Building prefix dict from the default dictionary ...
+所在位置 行:1 字符: 59
++ ... IOENCODING="utf-8"; python scripts/test_comprehensive.py 2>&1 | Out-F ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Building prefix... dictionary ...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Loading model from cache C:\Users\zzy86\AppData\Local\Temp\jieba.cache
+Loading model cost 0.416 seconds.
+Prefix dict has been built successfully.
+  [PASS] 閰嶇疆妯″潡瀵煎叆
+  [PASS] sys.path 娓呯悊
+  [PASS] 宸ヤ綔鐩綍瀛樺湪
+  [PASS] MODEL_ID 閰嶇疆
+  [PASS] EMBEDDING_MODEL 閰嶇疆
+  [PASS] RAG 鍙傛暟鑼冨洿
+
+[2] 鏂囨湰鍒嗗潡娴嬭瘯
+  [PASS] Chunk 鏁版嵁绫?
+  [PASS] 璇箟鍒嗗潡鍩烘湰
+  [PASS] 璇箟鍒嗗潡鍏冩暟鎹?
+  [PASS] 鍙ュ瓙鍒嗗潡
+  [PASS] 鍥哄畾闀垮害鍒嗗潡
+  [PASS] 绌烘枃鏈垎鍧?
+  [PASS] 鐭枃鏈繃婊?
+  [PASS] 瓒呴暱鏉℃枃鍒囧垎
+
+[3] BM25 妫€绱㈠櫒娴嬭瘯
+  [PASS] BM25 鍩烘湰妫€绱?
+  [PASS] BM25 绌烘煡璇?
+  [PASS] BM25 绌虹储寮?
+[RAG] BM25 绱㈠紩宸蹭繚瀛? 1 绡囨枃妗?-> C:\Users\zzy86\AppData\Local\Temp\tmpn3aupjns\bm25_test.pkl
+[RAG] BM25 绱㈠紩宸插姞杞? 1 绡囨枃妗?
+  [PASS] BM25 鎸佷箙鍖?
+
+[4] 鍚戦噺瀛樺偍娴嬭瘯
+  [PASS] 鍚戦噺瀛樺偍鍩烘湰鎿嶄綔
+  [PASS] 绌哄悜閲忓瓨鍌?
+[RAG] 鍚戦噺绱㈠紩宸蹭繚瀛? 2 鏉″悜閲?-> C:\Users\zzy86\AppData\Local\Temp\tmpclrwabkl\test_index
+[RAG] 鍚戦噺绱㈠紩宸插姞杞? 2 鏉″悜閲?
+  [PASS] 鍚戦噺瀛樺偍鎸佷箙鍖?
+
+[5] 娣峰悎妫€绱㈠櫒娴嬭瘯
+  [PASS] 绌烘煡璇㈡绱?
+  [PASS] 鏃犳暟鎹绱?
+  [PASS] 鏍煎紡鍖栬緭鍑?
+
+[6] 鏂囦欢宸ュ叿娴嬭瘯
+  [PASS] 鏂囦欢鍒涘缓璇诲彇
+  [PASS] 鏂囦欢瑕嗙洊淇濇姢
+  [PASS] 鏂囦欢鍒犻櫎
+  [PASS] 璺緞瓒婄晫淇濇姢
+  [PASS] 璇诲彇涓嶅瓨鍦ㄦ枃浠?
+  [PASS] 鏂囦欢鍘嬬缉
+
+[7] Word 鏂囨。宸ュ叿娴嬭瘯
+  [PASS] 鎶曡瘔淇＄敓鎴?
+  [PASS] 瀹℃煡鎶ュ憡鐢熸垚
+  [PASS] Word 璺緞瓒婄晫
+  [PASS] Word 纭鏈哄埗
+
+[8] 鍒涙柊宸ュ叿娴嬭瘯
+  [PASS] 璧斿伩棰勪及-椋熷搧瀹夊叏
+  [PASS] 璧斿伩棰勪及-娆鸿瘓
+  [PASS] 璧斿伩棰勪及-鏈煡绫诲瀷
+  [PASS] 璇佹嵁娓呭崟鐢熸垚
+  [PASS] 璇佹嵁娓呭崟-鏈煡绫诲瀷
+  [PASS] 缁存潈璺緞-椋熷搧瀹夊叏
+  [PASS] 缁存潈璺緞-缃戣喘
+  [PASS] 缁存潈璺緞-閫氱敤
+  [PASS] 鍟嗗璇濇湳搴斿
+  [PASS] 鍟嗗璇濇湳-鏈尮閰?
+  [PASS] 鏃舵晥鎻愰啋
+  [PASS] 鏃舵晥-鏃ユ湡鏍煎紡閿欒
+  [PASS] 鏃舵晥-鏈煡绫诲瀷
+  [PASS] 澶氬钩鍙版姇璇?12315
+  [PASS] 澶氬钩鍙版姇璇?娉曢櫌
+  [PASS] 澶氬钩鍙?鏈煡骞冲彴
+  [PASS] 璇佹嵁鎵撳寘
+  [PASS] 娑堣垂闄烽槺鏌ヨ
+  [PASS] 娑堣垂闄烽槺-鏈煡琛屼笟
+  [PASS] 鍟嗗淇¤獕-宸茬煡
+  [PASS] 鍟嗗淇¤獕-鏈煡
+  [PASS] 宸ュ叿鏍囩瀹屾暣鎬?
+
+[9] 鎼滅储宸ュ叿娴嬭瘯
+[RAG] 姝ｅ湪鍔犺浇宓屽叆妯″瀷 BAAI/bge-small-zh-v1.5 ...
+
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]
+Loading weights: 100%|鈻堚枅鈻堚枅鈻堚枅鈻堚枅鈻堚枅| 71/71 [00:00<00:00, 18206.00it/s]
+D:\2026灏忓鏈熷疄璁璡law-agent\rag\embedder.py:38: FutureWarning: The `get_sentence_embedding_dimension` method has been renamed to `get_embedding_dimension`.
+  self.dim = self.model.get_sentence_embedding_dimension()
+[RAG] 妯″瀷鍔犺浇瀹屾垚锛屽悜閲忕淮搴?512
+[RAG] 鍚戦噺绱㈠紩宸插姞杞? 155 鏉″悜閲?
+[RAG] BM25 绱㈠紩宸插姞杞? 155 绡囨枃妗?
+  [PASS] 娉曞緥妫€绱?
+  [PASS] 妗堜緥妫€绱?
+
+[10] Agent 宸ュ叿娴嬭瘯
+  [PASS] Agent 浜ゆ帴
+  [PASS] Agent 浜ゆ帴-鏈煡
+  [PASS] 缁存潈杩涘害鏌ヨ
+
+[11] 鐢ㄦ埛鐢诲儚娴嬭瘯
+  [PASS] 鐢诲儚-涓撲笟鐢ㄦ埛
+  [PASS] 鐢诲儚-鏂版墜鐢ㄦ埛
+  [PASS] 鐢诲儚-涓瓑鐢ㄦ埛
+  [PASS] 鐢诲儚-绱ц揩
+  [PASS] 鐢诲儚-涓嶇揣杩?
+  [PASS] 鐢诲儚-鍟嗗鐢ㄦ埛
+  [PASS] 鐢诲儚-绌鸿緭鍏?
+
+[12] 淇℃伅瀹屾暣鎬ф祴璇?
+  [PASS] 瀹屾暣鎬?QA 妯″紡
+  [PASS] 瀹屾暣鎬?瀹屾暣鎶曡瘔
+  [PASS] 瀹屾暣鎬?缂哄け淇℃伅
+  [PASS] 瀹屾暣鎬?瀹℃煡妯″紡
+  [PASS] 瀹屾暣鎬?鍘嗗彶鍚堝苟
+
+[13] 鎬濈淮閾炬祴璇?
+  [PASS] 鎬濈淮閾?鍩烘湰
+  [PASS] 鎬濈淮閾?甯︽儏缁?
+  [PASS] 鎬濈淮閾?甯﹀伐鍏?
+
+[14] 缃俊搴﹁瘎浼版祴璇?
+  [PASS] 缃俊搴?楂?
+  [PASS] 缃俊搴?涓?
+  [PASS] 缃俊搴?浣?
+  [PASS] 缃俊搴?瓒呭嚭鑼冨洿
+  [PASS] 缃俊搴?绌哄洖绛?
+  [PASS] 缃俊搴?emoji
+
+[15] 缁存潈杩涘害娴嬭瘯
+  [PASS] 杩涘害-鍒濆闃舵
+  [PASS] 杩涘害-骞冲彴鎶曡瘔
+  [PASS] 杩涘害-宸茶В鍐?
+  [PASS] 杩涘害-鏍煎紡鍖?
+  [PASS] 杩涘害-杩涘害鏉?
+  [PASS] 杩涘害-瀹屾暣璺緞
+
+[16] 鎯呯华鎰熺煡娴嬭瘯
+  [PASS] 鎯呯华-鎰ゆ€?
+  [PASS] 鎯呯华-鐒﹁檻
+  [PASS] 鎯呯华-濮斿眻
+  [PASS] 鎯呯华-涓€?
+  [PASS] 鎯呯华-绌鸿緭鍏?
+  [PASS] 鎯呯华鍓嶇紑鏋勫缓
+  [PASS] 鎯呯华鍓嶇紑-涓€?
+
+[17] 瀵硅瘽鍘嗗彶杞崲娴嬭瘯
+  [PASS] 鍘嗗彶-dict 鏍煎紡
+  [PASS] 鍘嗗彶-tuple 鏍煎紡
+  [PASS] 鍘嗗彶-绌?
+  [PASS] 鍐呭杞瓧绗︿覆
+  [PASS] 娓呯悊 Agent 杈撳嚭
+
+[18] Agent 缁撴瀯娴嬭瘯
+  [PASS] QA Agent 鍒濆鍖?
+  [PASS] Complaint Agent 鍒濆鍖?
+  [PASS] Review Agent 鍒濆鍖?
+  [PASS] BaseAgent 绫诲睘鎬?
+
+[19] 鏁版嵁搴撴ā鍧楁祴璇?
+  [PASS] schema 鏂囦欢瀛樺湪
+[DB] MySQL 鏁版嵁搴撳垵濮嬪寲瀹屾垚: localhost:3306/consumer_rights
+  [PASS] DatabaseManager 绫诲畾涔?
+  [PASS] JSON 搴忓垪鍖?
+
+============================================================
+娴嬭瘯缁撴灉姹囨€?
+============================================================
+  閫氳繃: 107/107
+  澶辫触: 0/107
+
+  鍏ㄩ儴娴嬭瘯閫氳繃锛?
+

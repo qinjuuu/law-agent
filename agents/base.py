@@ -18,6 +18,7 @@ Agent 基类模块
 """
 import asyncio
 import time
+from datetime import datetime
 from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk
 
 
@@ -354,7 +355,17 @@ class BaseAgent:
                 pass
 
         # ========== 4. 构建 Agent ==========
+        now = datetime.now()
+        weekday_names = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+        current_time = now.strftime("%Y年%m月%d日 %H:%M:%S")
+        current_weekday = weekday_names[now.weekday()]
         enhancement_instruction = ""
+        enhancement_instruction += (
+            f"\n【当前时间】现在是 {current_time} {current_weekday}。"
+            f"请根据当前时间判断用户提到的相对时间（如'昨天'、'上周'、'上个月'）的具体日期，"
+            f"计算维权时效是否过期、剩余天数等。"
+            f"如果用户提到购买日期或纠纷发生日期，请结合当前时间计算已过天数和剩余时效。\n"
+        )
         enhancement_instruction += f"\n【用户画像】{profile['style_hint']}\n"
 
         if completeness["should_ask"]:
@@ -490,6 +501,13 @@ class BaseAgent:
         if not final_answer:
             final_answer = "未能生成有效回复，请尝试换个问法。"
 
+        # 向前端发送"正在自检"状态，避免后处理期间长时间无响应
+        _tool_text = ""
+        if tool_status_labels:
+            _tool_text = "\n".join(f"> {l}" for l in tool_status_labels) + "\n\n"
+        _pre_display = (emotion_prefix or "") + _tool_text + "---\n\n" + final_answer + "\n\n⏳ 正在自检回答质量，评估置信度..."
+        yield _pre_display
+
         # 数据库: 记录消息和工具调用 + 业务数据提取
         msg_id = 0
         if db and conversation_id:
@@ -624,12 +642,17 @@ class BaseAgent:
         suffix = "\n".join(suffix_parts)
 
         # ========== 流式输出最终完整结果 ==========
-        # 逐段输出前缀 + 正文 + 后缀，模拟打字效果
+        # 逐字输出，模拟打字机效果，让用户感受到AI在"思考"
         full_output = prefix + final_answer + suffix
-        chunk_size = 20
-        for i in range(0, len(full_output), chunk_size):
-            yield full_output[:i + chunk_size]
-            await asyncio.sleep(0.01)
+        total_len = len(full_output)
+        # 根据内容长度动态调整打字速度，目标总时间约3秒
+        target_time = 3.0
+        base_delay = max(0.008, min(0.03, target_time / max(total_len, 1)))
+        # 动态步长：保证总迭代次数约400次，总时间稳定在3-4秒
+        step = max(1, int(total_len / 400))
+        for i in range(0, total_len, step):
+            yield full_output[:i + step]
+            await asyncio.sleep(base_delay)
 
         # 确保最终完整输出
         yield full_output

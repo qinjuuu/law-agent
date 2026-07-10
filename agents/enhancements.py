@@ -501,12 +501,12 @@ class ConfidenceEvaluator:
             confidence_label = "低"
             confidence_emoji = "🔴"
             reason = "问题可能超出系统专业范围"
-        elif has_law_reference and law_signals >= 2 and answer_length > 100:
+        elif has_law_reference and law_signals >= 2 and answer_length > 30:
             confidence = "high"
             confidence_label = "高"
             confidence_emoji = "🟢"
             reason = "回答引用了具体法条，有明确法律依据"
-        elif law_signals >= 1 or answer_length > 50:
+        elif law_signals >= 1 or answer_length > 10:
             confidence = "medium"
             confidence_label = "中"
             confidence_emoji = "🟡"

@@ -31,3 +31,10 @@ numpy>=1.24.0
 
 # MySQL 数据库驱动
 pymysql>=1.1.0
+
+# 间接依赖（pip 自动解析遗漏补全）
+httpx>=0.27.0
+pyyaml>=6.0
+tqdm>=4.66.0
+requests>=2.31.0
+jsonpointer>=3.0.0

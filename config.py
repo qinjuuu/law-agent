@@ -13,6 +13,13 @@ os.environ["HF_HUB_DISABLE_SSL_VERIFICATION"] = "1"
 os.environ["CURL_CA_BUNDLE"] = ""
 os.environ["HF_HUB_OFFLINE"] = "0"
 
+# 清理 sys.path 中可能存在的全局 Python312 用户目录（避免与 venv 冲突）
+# 系统 PYTHONPATH 可能指向 Python312 的 site-packages，导致 torch 等库版本冲突
+sys.path = [
+    p for p in sys.path
+    if not ("python312" in p.lower() and "site-packages" in p.lower())
+]
+
 from dotenv import load_dotenv
 
 # Windows 控制台默认 GBK，强制使用 UTF-8 避免中文乱码

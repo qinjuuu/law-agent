@@ -80,13 +80,31 @@ class VectorStore:
             path_prefix: 文件路径前缀，默认使用 data/vectors/faiss_index
         """
         import faiss
+        import tempfile
+        import shutil
         if path_prefix is None:
             path_prefix = os.path.join(VECTORS_DIR, "faiss_index")
 
-        # 保存 FAISS 索引
-        faiss.write_index(self.index, f"{path_prefix}.faiss")
+        # 确保目录存在
+        os.makedirs(os.path.dirname(path_prefix), exist_ok=True)
+
+        faiss_path = f"{path_prefix}.faiss"
+        meta_path = f"{path_prefix}.meta"
+
+        # FAISS 的 C++ 底层 fopen 无法处理非 ASCII 路径（Windows 中文路径），
+        # 先写到临时文件（ASCII 路径），再移动到目标位置
+        with tempfile.NamedTemporaryFile(suffix=".faiss", delete=False) as tmp:
+            tmp_faiss_path = tmp.name
+        try:
+            faiss.write_index(self.index, tmp_faiss_path)
+            shutil.move(tmp_faiss_path, faiss_path)
+        except Exception:
+            if os.path.exists(tmp_faiss_path):
+                os.unlink(tmp_faiss_path)
+            raise
+
         # 保存 Chunk 元数据
-        with open(f"{path_prefix}.meta", "wb") as f:
+        with open(meta_path, "wb") as f:
             pickle.dump(self.chunks, f)
         print(f"[RAG] 向量索引已保存: {self.size} 条向量 -> {path_prefix}")
 
@@ -98,6 +116,8 @@ class VectorStore:
             是否加载成功
         """
         import faiss
+        import tempfile
+        import shutil
         if path_prefix is None:
             path_prefix = os.path.join(VECTORS_DIR, "faiss_index")
 
@@ -106,7 +126,17 @@ class VectorStore:
         if not os.path.exists(faiss_path):
             return False
 
-        self.index = faiss.read_index(faiss_path)
+        # FAISS 的 C++ 底层 fopen 无法处理非 ASCII 路径（Windows 中文路径），
+        # 先复制到临时文件（ASCII 路径），再从临时文件加载
+        with tempfile.NamedTemporaryFile(suffix=".faiss", delete=False) as tmp:
+            tmp_faiss_path = tmp.name
+        try:
+            shutil.copy2(faiss_path, tmp_faiss_path)
+            self.index = faiss.read_index(tmp_faiss_path)
+        finally:
+            if os.path.exists(tmp_faiss_path):
+                os.unlink(tmp_faiss_path)
+
         with open(meta_path, "rb") as f:
             self.chunks = pickle.load(f)
         print(f"[RAG] 向量索引已加载: {self.size} 条向量")
