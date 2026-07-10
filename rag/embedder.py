@@ -35,7 +35,7 @@ class Embedder:
         try:
             from sentence_transformers import SentenceTransformer
             self.model = SentenceTransformer(model_name)
-            self.dim = self.model.get_sentence_embedding_dimension()
+            self.dim = self.model.get_embedding_dimension()
             print(f"[RAG] 模型加载完成，向量维度 {self.dim}")
         except Exception as e:
             print(f"[RAG] 嵌入模型加载失败: {e}")

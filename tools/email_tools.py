@@ -79,17 +79,21 @@ def send_email(
     if not to_email or "@" not in to_email:
         return f"收件人邮箱地址无效: {to_email}"
 
-    # 处理附件路径
+    # 处理附件路径（带安全校验，防止路径越界读取任意文件）
     attachment_paths = []
     if attachments:
         for fname in attachments:
-            # 先尝试从 WORD_REPORTS_DIR 查找
-            path_in_reports = os.path.join(WORD_REPORTS_DIR, fname)
+            # 安全校验：禁止包含 .. 或绝对路径
+            if ".." in fname or os.path.isabs(fname):
+                return f"附件路径不合法: {fname}（仅允许 workspace/reports/ 目录下的文件）"
+            # 从 WORD_REPORTS_DIR 查找
+            path_in_reports = os.path.normpath(os.path.join(WORD_REPORTS_DIR, fname))
+            # 严格检查路径不越界
+            root_norm = os.path.normpath(WORD_REPORTS_DIR)
+            if os.path.commonpath([path_in_reports, root_norm]) != root_norm:
+                return f"附件路径越界: {fname}"
             if os.path.exists(path_in_reports):
                 attachment_paths.append(path_in_reports)
-            elif os.path.exists(fname):
-                # 如果传入的是绝对路径或相对路径且存在
-                attachment_paths.append(fname)
             else:
                 return f"附件文件不存在: {fname}（请在 workspace/reports/ 目录下查找）"
 

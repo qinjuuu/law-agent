@@ -26,6 +26,7 @@ from langchain_core.messages import HumanMessage, AIMessage, AIMessageChunk
 # 工具名称到中文标签的映射
 # ============================================================
 _TOOL_LABELS = {
+    "smart_search": "智能检索(本地+联网)",
     "search_law": "检索法律条文",
     "search_case": "检索相关案例",
     "search_web": "联网搜索",

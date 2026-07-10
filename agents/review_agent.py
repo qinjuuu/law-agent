@@ -5,7 +5,7 @@
 """
 from langchain_openai import ChatOpenAI
 from config import ARK_API_KEY, ARK_BASE_URL, MODEL_ID
-from tools.search_tools import search_law
+from tools.search_tools import search_law, smart_search
 from tools.word_tools import create_review_report
 from tools.agent_tools import handoff_to_agent
 from tools.email_tools import send_email
@@ -26,7 +26,7 @@ REVIEW_SYSTEM_PROMPT = """你是一个消费合同格式条款审查专家。你
 
 你的工作流程:
 1. 仔细阅读消费者提供的合同条款
-2. 使用 search_law 工具检索相关的消费者权益保护法律条文
+2. 使用 smart_search 工具检索相关的消费者权益保护法律条文（智能检索：先查本地知识库，匹配不足自动联网）
 3. 逐一分析条款的合法性和公平性
 4. 对每条条款进行风险评分（1-10分），并标注风险颜色等级
 5. 给出具体的修改建议
@@ -84,6 +84,6 @@ class ReviewAgent(BaseAgent):
             temperature=0.3,
             streaming=True,
         )
-        self.tools = [search_law, create_review_report, send_email, handoff_to_agent]
+        self.tools = [smart_search, search_law, create_review_report, send_email, handoff_to_agent]
         self.system_prompt = REVIEW_SYSTEM_PROMPT
         self.agent_type = "review"

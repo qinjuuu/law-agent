@@ -19,7 +19,7 @@ if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
 
-from config import LAWS_DIR, CASES_DIR, TEMPLATES_DIR, VECTORS_DIR
+from config import LAWS_DIR, CASES_DIR, TEMPLATES_DIR, KNOWLEDGE_DIR, VECTORS_DIR
 from rag.chunking import TextChunker
 from rag.embedder import Embedder
 from rag.vector_store import VectorStore
@@ -55,10 +55,12 @@ def main():
     law_files = load_text_files(LAWS_DIR)
     case_files = load_text_files(CASES_DIR)
     template_files = load_text_files(TEMPLATES_DIR)
+    knowledge_files = load_text_files(KNOWLEDGE_DIR)
 
     print(f"  法律条文: {len(law_files)} 个文件")
     print(f"  维权案例: {len(case_files)} 个文件")
     print(f"  模板文档: {len(template_files)} 个文件")
+    print(f"  知识库: {len(knowledge_files)} 个文件")
 
     all_files = []
     for name, content in law_files:
@@ -67,6 +69,8 @@ def main():
         all_files.append((name, content, "case"))
     for name, content in template_files:
         all_files.append((name, content, "template"))
+    for name, content in knowledge_files:
+        all_files.append((name, content, "knowledge"))
 
     if not all_files:
         print("  [警告] 未找到任何文本文件，请检查 data/ 目录")

@@ -49,6 +49,7 @@ DATA_DIR = os.path.join(_PROJECT_ROOT, "data")
 LAWS_DIR = os.path.join(DATA_DIR, "laws")
 CASES_DIR = os.path.join(DATA_DIR, "cases")
 TEMPLATES_DIR = os.path.join(DATA_DIR, "templates")
+KNOWLEDGE_DIR = os.path.join(DATA_DIR, "knowledge")
 VECTORS_DIR = os.path.join(DATA_DIR, "vectors")
 
 # 分块参数

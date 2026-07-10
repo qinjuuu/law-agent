@@ -4,7 +4,7 @@
 """
 from tools.file_tools import create_file, read_file, delete_file, zip_files
 from tools.word_tools import create_complaint_report, create_review_report
-from tools.search_tools import search_law, search_case
+from tools.search_tools import search_law, search_case, smart_search
 from tools.innovation_tools import (
     estimate_compensation,
     generate_evidence_checklist,
@@ -28,6 +28,7 @@ all_tools = [
     create_review_report,
     search_law,
     search_case,
+    smart_search,
     estimate_compensation,
     generate_evidence_checklist,
     plan_rights_path,
@@ -49,6 +50,7 @@ __all__ = [
     "create_review_report",
     "search_law",
     "search_case",
+    "smart_search",
     "estimate_compensation",
     "generate_evidence_checklist",
     "plan_rights_path",

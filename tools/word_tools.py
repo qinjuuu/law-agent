@@ -23,8 +23,10 @@ def _safe_word_path(filename: str) -> str:
     """确保 Word 文件保存在 WORD_REPORTS_DIR 下，自动补全 .docx 后缀"""
     if not filename.endswith(".docx"):
         filename += ".docx"
-    abs_path = os.path.normpath(os.path.join(WORD_REPORTS_DIR, filename))
-    if not abs_path.startswith(os.path.normpath(WORD_REPORTS_DIR)):
+    root_norm = os.path.normpath(WORD_REPORTS_DIR)
+    abs_path = os.path.normpath(os.path.join(root_norm, filename))
+    # 使用 commonpath 严格判断，避免 startswith 被同前缀目录绕过
+    if os.path.commonpath([abs_path, root_norm]) != root_norm:
         raise ValueError(f"路径越界: {filename}")
     return abs_path
 

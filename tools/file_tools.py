@@ -25,8 +25,11 @@ def _safe_path(relative_path: str, root: str = WORK_ROOT) -> str:
     返回绝对路径
     如果路径越界，抛出 ValueError 异常
     """
-    abs_file_path = os.path.normpath(os.path.join(root, relative_path))
-    if not abs_file_path.startswith(os.path.normpath(root)):
+    root_norm = os.path.normpath(root)
+    abs_file_path = os.path.normpath(os.path.join(root_norm, relative_path))
+    # 使用 commonpath 严格判断，避免 startswith 被同前缀目录绕过
+    # 例如 root=.../files 时，../files_evil/x.txt 会通过 startswith 但不应通过
+    if os.path.commonpath([abs_file_path, root_norm]) != root_norm:
         raise ValueError(f"路径越界: {relative_path}")
     return abs_file_path
 
