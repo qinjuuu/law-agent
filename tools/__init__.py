@@ -16,6 +16,7 @@ from tools.innovation_tools import (
     trap_warning,
     check_merchant_reputation,
 )
+from tools.email_tools import send_email
 
 # 工具列表，供 Agent 注册使用
 all_tools = [
@@ -36,6 +37,7 @@ all_tools = [
     package_evidence,
     trap_warning,
     check_merchant_reputation,
+    send_email,
 ]
 
 __all__ = [
@@ -56,5 +58,6 @@ __all__ = [
     "package_evidence",
     "trap_warning",
     "check_merchant_reputation",
+    "send_email",
     "all_tools",
 ]

@@ -75,6 +75,17 @@ MYSQL_USER = os.getenv("MYSQL_USER", "root")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "consumer_rights")
 
+# ============================================================
+# SMTP 邮件配置（发送投诉信/审查报告等）
+# ============================================================
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.qq.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+
+# 邮件功能是否已配置（所有字段都有值时才启用）
+SMTP_ENABLED = bool(SMTP_SERVER and SMTP_PORT and SMTP_USER and SMTP_PASSWORD)
+
 for dir_path in [WORK_ROOT, WORD_REPORTS_DIR, VECTORS_DIR]:
     os.makedirs(dir_path, exist_ok=True)
 

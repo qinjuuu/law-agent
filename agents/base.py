@@ -48,6 +48,7 @@ _TOOL_LABELS = {
     "check_merchant_reputation": "查询商家信誉",
     "handoff_to_agent": "切换智能体",
     "get_rights_progress": "查询维权进度",
+    "send_email": "发送邮件",
 }
 
 
@@ -837,6 +838,45 @@ class BaseAgent:
                 file_size = os.path.getsize(filepath) if filepath and os.path.exists(filepath) else 0
                 if filename:
                     db.log_document(conv_id, "evidence_package", filename, filepath, file_size)
+            except Exception:
+                pass
+
+        # --- 邮件发送 ---
+        if "send_email" in tool_calls:
+            try:
+                from config import SMTP_USER
+                # 尝试从回答中提取收件人邮箱
+                to_email = ""
+                m = _re.search(r"收件人[:\s]*([\w.+-]+@[\w-]+\.[\w.-]+)", answer)
+                if m:
+                    to_email = m.group(1)
+                # 尝试提取邮件主题
+                subject = ""
+                m = _re.search(r"主题[:\s]*(.+?)(?:\n|$)", answer)
+                if m:
+                    subject = m.group(1).strip()
+                # 判断发送状态
+                if "✅" in answer and "发送成功" in answer:
+                    status = "sent"
+                elif "❌" in answer and "发送失败" in answer:
+                    status = "failed"
+                else:
+                    status = "preview"  # 仅预览，未发送
+                # 提取附件信息
+                attachments = []
+                m = _re.search(r"附件[:\s]*(.+?)(?:\n|$)", answer)
+                if m and "无" not in m.group(1):
+                    attachments = [a.strip() for a in m.group(1).split(",") if a.strip()]
+                db.log_email(
+                    conv_id, msg_id,
+                    from_email=SMTP_USER or "",
+                    to_email=to_email,
+                    subject=subject,
+                    body_preview=answer[:500],
+                    attachments=attachments,
+                    status=status,
+                    error_message="" if status != "failed" else answer[:500],
+                )
             except Exception:
                 pass
 

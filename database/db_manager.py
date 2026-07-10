@@ -716,6 +716,21 @@ class DatabaseManager:
              file_path, file_size),
         )
 
+    def log_email(self, conversation_id: int, message_id: int,
+                  from_email: str, to_email: str, subject: str,
+                  body_preview: str = "", attachments: list = None,
+                  status: str = "sent", error_message: str = ""):
+        """记录邮件发送日志"""
+        self._execute_write(
+            "INSERT INTO email_logs (conversation_id, message_id, from_email, to_email, subject, "
+            "body_preview, attachments, attachment_count, status, error_message) "
+            "VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            (conversation_id, message_id, from_email, to_email, subject,
+             body_preview[:500] if body_preview else "",
+             self._json_dumps(attachments or []), len(attachments or []),
+             status, error_message[:500] if error_message else ""),
+        )
+
     def log_clause_review(self, conversation_id: int, data: dict, file_path: str = "", file_size: int = 0):
         """记录条款审查"""
         self._execute_write(
@@ -748,7 +763,7 @@ class DatabaseManager:
             "complaints", "clause_reviews", "compensation_estimates",
             "evidence_checklists", "rights_paths", "merchant_tactics",
             "deadline_reminders", "merchant_reputations", "trap_warnings",
-            "documents", "conversation_summaries",
+            "documents", "conversation_summaries", "email_logs",
             "laws", "case_precedents", "compensation_rules",
             "evidence_templates", "rights_path_templates", "platform_templates",
             "rights_stages", "deadline_rules", "merchant_tactics_kb", "trap_kb",
@@ -880,6 +895,16 @@ class DatabaseManager:
         rows = self._execute_query(
             "SELECT legal_level, urgency, user_type, COUNT(*) AS count "
             "FROM user_profiles GROUP BY legal_level, urgency, user_type ORDER BY count DESC"
+        )
+        return [dict(r) for r in rows]
+
+    def get_email_stats(self) -> list:
+        """获取邮件发送统计"""
+        rows = self._execute_query(
+            "SELECT status, COUNT(*) AS count, "
+            "SUM(CASE WHEN status='sent' THEN 1 ELSE 0 END) AS sent_count, "
+            "SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) AS failed_count "
+            "FROM email_logs GROUP BY status ORDER BY count DESC"
         )
         return [dict(r) for r in rows]
 

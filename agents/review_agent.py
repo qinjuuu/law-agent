@@ -8,6 +8,7 @@ from config import ARK_API_KEY, ARK_BASE_URL, MODEL_ID
 from tools.search_tools import search_law
 from tools.word_tools import create_review_report
 from tools.agent_tools import handoff_to_agent
+from tools.email_tools import send_email
 from agents.base import BaseAgent
 
 
@@ -31,6 +32,8 @@ REVIEW_SYSTEM_PROMPT = """你是一个消费合同格式条款审查专家。你
 5. 给出具体的修改建议
 6. 使用 create_review_report 工具生成审查报告 Word 文档
    调用时 confirm 参数必须设为 True
+7. 发送邮件 — 使用 send_email 工具，将审查报告通过邮件发送给用户留存
+   发送流程: 先用 confirm=False 获取预览，用户确认后设 confirm=True 发送
 
 风险评分标准（1-10分）:
 - 1-3分 【绿色·合规】: 条款措辞规范，不影响消费者核心权益，无需修改
@@ -81,6 +84,6 @@ class ReviewAgent(BaseAgent):
             temperature=0.3,
             streaming=True,
         )
-        self.tools = [search_law, create_review_report, handoff_to_agent]
+        self.tools = [search_law, create_review_report, send_email, handoff_to_agent]
         self.system_prompt = REVIEW_SYSTEM_PROMPT
         self.agent_type = "review"

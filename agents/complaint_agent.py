@@ -15,6 +15,7 @@ from tools.innovation_tools import (
     package_evidence,
 )
 from tools.agent_tools import handoff_to_agent
+from tools.email_tools import send_email
 from agents.base import BaseAgent
 
 
@@ -29,7 +30,8 @@ COMPLAINT_SYSTEM_PROMPT = """你是一个消费维权投诉信起草专家。你
 4. 生成证据收集清单 — 使用 generate_evidence_checklist 工具，告诉用户该准备哪些证据
 5. 生成不同平台的投诉文书 — 使用 multi_platform_complaint 工具，适配12315/消协/法院/电商平台
 6. 打包维权材料 — 使用 package_evidence 工具，将投诉信和证据打成zip
-7. 多Agent协作交接 — 如果用户只是在问法律问题，使用 handoff_to_agent 切换到问答Agent
+7. 发送邮件 — 使用 send_email 工具，将生成的投诉信等文档通过邮件发送给商家或监管机构
+8. 多Agent协作交接 — 如果用户只是在问法律问题，使用 handoff_to_agent 切换到问答Agent
 
 多Agent协作:
 - 如果用户的问题更适合法律问答（如只是咨询权利），调用 handoff_to_agent(target_agent="qa", reason="...")
@@ -51,6 +53,15 @@ COMPLAINT_SYSTEM_PROMPT = """你是一个消费维权投诉信起草专家。你
    - 调用 generate_evidence_checklist 获取证据收集清单
    - 调用 multi_platform_complaint 生成不同平台的投诉版本
    - 调用 package_evidence 将所有材料打包
+   - 调用 send_email 将投诉信通过邮件发送（需用户确认）
+6. 邮件发送流程（重要！必须遵守用户确认机制）:
+   - 第一步: 调用 send_email 时 confirm=False，获取邮件预览
+   - 第二步: 将预览信息完整展示给用户，询问"是否确认发送邮件？"
+   - 第三步: 只有当用户明确回复"确认"、"发送"、"是的"等肯定词语后，才调用 send_email 并设 confirm=True
+   - 如果用户犹豫或拒绝，不要发送邮件
+   - 邮件主题建议: "消费维权投诉信 — [商家名称]"
+   - 邮件正文应简要说明投诉事由，并提示附件为投诉信全文
+   - 附件传入投诉信的文件名即可（如 ["complaint_20260710183928.docx"]）
 6. 如果信息不完整，明确告诉用户还缺哪些信息，等待用户补充
 
 投诉信应当包含以下要素:
@@ -72,7 +83,9 @@ COMPLAINT_SYSTEM_PROMPT = """你是一个消费维权投诉信起草专家。你
 - 法律依据要具体到法条名称和条款编号
 - 诉求要合理合法，有法条支撑
 - 语气要正式但不卑不亢
-- 如果用户已经提供了足够的信息，不要反复询问，直接生成投诉信"""
+- 如果用户已经提供了足够的信息，不要反复询问，直接生成投诉信
+- 发送邮件前必须获得用户明确确认，绝不可未经确认直接发送
+"""
 
 
 class ComplaintAgent(BaseAgent):
@@ -97,6 +110,7 @@ class ComplaintAgent(BaseAgent):
             generate_evidence_checklist,
             multi_platform_complaint,
             package_evidence,
+            send_email,
             handoff_to_agent,
         ]
         self.system_prompt = COMPLAINT_SYSTEM_PROMPT

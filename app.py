@@ -26,7 +26,7 @@ if sys.platform == "win32":
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 import gradio as gr
-from config import MODEL_ID, EMBEDDING_MODEL, VECTORS_DIR, WORD_REPORTS_DIR, WORK_ROOT, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE
+from config import MODEL_ID, EMBEDDING_MODEL, VECTORS_DIR, WORD_REPORTS_DIR, WORK_ROOT, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE, SMTP_ENABLED, SMTP_SERVER, SMTP_USER
 
 # ============================================================
 # 亮色主题 CSS（橙色点缀）
@@ -558,6 +558,80 @@ def tool_rights_path(dispute_description):
 
 
 # ============================================================
+# 邮件发送（工具箱独立功能）
+# ============================================================
+def tool_send_email(to_email, subject, body, attachment_file, confirm):
+    """发送邮件（工具箱版，支持附件和用户确认）
+
+    确认流程:
+    1. 点击"预览邮件"按钮 → confirm=False，返回邮件预览，不实际发送
+    2. 用户查看预览后，勾选"我已确认邮件内容，同意发送"复选框
+    3. 点击"发送邮件"按钮 → confirm=True（复选框已勾选），实际发送邮件
+    4. 如果未勾选复选框直接点击"发送邮件"，会提示用户先确认
+    """
+    from tools.email_tools import send_email
+    from config import SMTP_ENABLED
+
+    # SMTP 配置检查
+    if not SMTP_ENABLED:
+        return (
+            "邮件功能未启用：SMTP 配置不完整。\n"
+            "请在 .env 文件中配置 SMTP_SERVER、SMTP_PORT、SMTP_USER、SMTP_PASSWORD。"
+        )
+
+    if not to_email or "@" not in to_email:
+        return "请输入有效的收件人邮箱地址"
+    if not subject:
+        return "请输入邮件主题"
+    if not body:
+        return "请输入邮件正文"
+
+    attachments = [attachment_file] if attachment_file else None
+
+    # 未勾选确认复选框时，不发送，返回预览 + 提示
+    if not confirm:
+        try:
+            preview = send_email.invoke({
+                "to_email": to_email,
+                "subject": subject,
+                "body": body,
+                "attachments": attachments,
+                "confirm": False,
+            })
+            return (
+                f"{preview}\n\n"
+                "⚠️ 邮件尚未发送！\n"
+                "请确认以上邮件内容无误后，勾选上方的「我已确认邮件内容，同意发送」复选框，"
+                "再点击「发送邮件」按钮完成发送。"
+            )
+        except Exception as e:
+            return f"邮件预览失败: {str(e)}"
+
+    # confirm=True，实际发送邮件
+    try:
+        result = send_email.invoke({
+            "to_email": to_email,
+            "subject": subject,
+            "body": body,
+            "attachments": attachments,
+            "confirm": True,
+        })
+        return result
+    except Exception as e:
+        return f"邮件发送失败: {str(e)}"
+
+
+def get_report_files():
+    """获取 workspace/reports/ 下的 .docx 文件列表，供邮件附件下拉选择"""
+    files = []
+    if os.path.exists(WORD_REPORTS_DIR):
+        for f in sorted(os.listdir(WORD_REPORTS_DIR)):
+            if f.endswith(".docx") or f.endswith(".zip"):
+                files.append(f)
+    return files if files else []
+
+
+# ============================================================
 # 对话摘要导出
 # ============================================================
 def export_conversation_summary(history: list):
@@ -732,6 +806,16 @@ def get_system_info():
         else:
             completeness_rows = "| 暂无完整性记录 | - | - | - |\n"
 
+        # 邮件发送统计
+        email_stats = db.get_email_stats()
+        email_rows = ""
+        if email_stats:
+            for es in email_stats:
+                status_label = {"sent": "发送成功", "failed": "发送失败", "preview": "仅预览"}.get(es.get("status", ""), es.get("status", ""))
+                email_rows += f"| {status_label} | {es.get('count', 0)} |\n"
+        else:
+            email_rows = "| 暂无邮件记录 | - |\n"
+
         # 扩展数据表记录数
         ext_table_rows = ""
         ext_tables = {
@@ -742,6 +826,7 @@ def get_system_info():
             "merchant_reputations": "商家信誉",
             "trap_warnings": "陷阱预警",
             "conversation_summaries": "对话摘要",
+            "email_logs": "邮件发送日志",
             "merchant_tactics_kb": "话术知识库",
         }
         for t, label in ext_tables.items():
@@ -750,7 +835,7 @@ def get_system_info():
         db_stats_html = f"""
 ---
 
-## 数据库统计 (35张表 / {stats['total_records']}条记录 / {db_size_kb:.0f}KB)
+## 数据库统计 (36张表 / {stats['total_records']}条记录 / {db_size_kb:.0f}KB)
 
 ### 核心数据表记录数
 
@@ -870,9 +955,16 @@ def get_system_info():
 | Agent类型 | 平均完整度 | 追问次数 | 总记录数 |
 |-----------|-----------|----------|----------|
 {completeness_rows}
-"""
+
+### 邮件发送统计
+
+| 状态 | 次数 |
+|------|------|
+{email_rows}"""
     except Exception as e:
         db_stats_html = f"\n---\n\n## 数据库统计\n\n数据库初始化中... ({e})\n"
+
+    email_status = f"已启用 ({SMTP_SERVER}: {SMTP_USER})" if SMTP_ENABLED else "未配置"
 
     info = f"""## 系统状态
 
@@ -882,6 +974,7 @@ def get_system_info():
 | 嵌入模型 | `{EMBEDDING_MODEL}` |
 | RAG 知识库 | {rag_label} (7部法律法规, 155个文本块) |
 | 联网搜索 | 已启用 (DuckDuckGo API) |
+| 邮件发送 | {email_status} |
 | 工作目录 | `{WORK_ROOT}` |
 | 报告目录 | `{WORD_REPORTS_DIR}` |
 | 数据库 | MySQL `{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}` |
@@ -889,7 +982,7 @@ def get_system_info():
 
 ---
 
-## 创新功能一览（24项）
+## 创新功能一览（25项）
 
 ### Agent 智能维度（9项）
 
@@ -911,7 +1004,7 @@ def get_system_info():
 |--------|------|
 | 多Agent协作交接 | QA/投诉/审查Agent间带上下文智能切换 |
 
-### 工具与功能（14项）
+### 工具与功能（15项）
 
 | 创新点 | 说明 |
 |--------|------|
@@ -926,6 +1019,7 @@ def get_system_info():
 | 条款风险评分 | 1-10分风险评分+红黄绿颜色标注 |
 | 商家信誉查询 | 本地数据+联网搜索双模式商家信誉 |
 | 对话摘要导出 | 多轮对话压缩为结构化纪要文档 |
+| **邮件发送** | 通过SMTP将投诉信/审查报告等维权文档邮件发送，发送前需用户确认 |
 | **联网搜索增强** | DuckDuckGo API 实时搜索最新法律法规和案例 |
 | **最新法规搜索** | 专门搜索2024年最新消费法规政策动态 |
 | **商家信息联网** | 本地无数据时自动联网搜索商家投诉和处罚信息 |
@@ -972,7 +1066,7 @@ def get_system_info():
 - **维权进度追踪**: 记录维权走到哪一步，推荐下一步
 - **RAG混合检索**: FAISS向量+BM25关键词双路检索，加权融合
 - **联网搜索增强**: 本地知识库覆盖不了时自动联网搜索最新法规和案例
-- **全流程数据库记录**: 35张表记录对话/工具/情绪/自反思/置信度/进度等全维度数据
+- **全流程数据库记录**: 36张表记录对话/工具/情绪/自反思/置信度/进度等全维度数据
 - **真正流式输出**: LLM 生成内容逐字实时显示，无需等待完整结果
 """
     return info
@@ -1028,8 +1122,8 @@ def create_app():
                     '<div class="ark-subtitle">'
                     'CONSUMER RIGHTS PROTECTION ASSISTANT &nbsp;|&nbsp; '
                     '基于 LangChain + RAG + 多智能体架构 &nbsp;|&nbsp; '
-                    '24项创新功能 &nbsp;|&nbsp; '
-                    '35表全维度数据库'
+                    '25项创新功能 &nbsp;|&nbsp; '
+                    '36表全维度数据库'
                     '</div>'
                 )
 
@@ -1231,6 +1325,45 @@ def create_app():
 
                 gr.HTML('<div class="ark-divider"></div>')
 
+                # 邮件发送
+                gr.HTML('<div class="tool-card"><h3>邮件发送</h3>'
+                        '<p>将生成的投诉信、审查报告等维权文档通过邮件发送。'
+                        '附件从 workspace/reports/ 目录选取。</p>'
+                        '<br>'
+                        '<p><b>确认流程</b>: 1) 填写信息 → 2) 点击「预览邮件」查看预览 → '
+                        '3) 确认无误后勾选「我已确认邮件内容，同意发送」→ 4) 点击「发送邮件」</p></div>')
+                with gr.Row():
+                    with gr.Column():
+                        email_to = gr.Textbox(
+                            label="收件人邮箱",
+                            placeholder="如 consumer@example.com",
+                        )
+                        email_subject = gr.Textbox(
+                            label="邮件主题",
+                            placeholder="如 消费维权投诉信 — 某某超市",
+                        )
+                    with gr.Column():
+                        email_attachment = gr.Dropdown(
+                            choices=get_report_files(),
+                            label="附件（从已生成的报告中选择）",
+                            interactive=True,
+                        )
+                        email_confirm = gr.Checkbox(
+                            label="我已确认邮件内容，同意发送",
+                            value=False,
+                        )
+                email_body = gr.Textbox(
+                    label="邮件正文",
+                    placeholder="简要说明投诉事由，并提示附件为投诉信全文...",
+                    lines=4,
+                )
+                with gr.Row():
+                    email_preview_btn = gr.Button("预览邮件", variant="primary")
+                    email_send_btn = gr.Button("发送邮件", variant="stop")
+                email_out = gr.Textbox(label="发送结果", lines=10)
+
+                gr.HTML('<div class="ark-divider"></div>')
+
                 # 对话摘要导出
                 gr.HTML('<div class="tool-card"><h3>对话纪要导出</h3>'
                         '<p>将最近一次对话整理为结构化纪要文档，包含问题描述、法律依据、'
@@ -1247,6 +1380,18 @@ def create_app():
                 tac_btn.click(fn=tool_tactics, inputs=tac_input, outputs=tac_out)
                 path_btn.click(fn=tool_rights_path, inputs=path_input, outputs=path_out)
                 summary_btn.click(fn=lambda: export_conversation_summary(_last_history), outputs=summary_out)
+
+                # 邮件发送事件绑定
+                email_preview_btn.click(
+                    fn=lambda t, s, b, a, c: tool_send_email(t, s, b, a, False),
+                    inputs=[email_to, email_subject, email_body, email_attachment, email_confirm],
+                    outputs=email_out,
+                )
+                email_send_btn.click(
+                    fn=tool_send_email,
+                    inputs=[email_to, email_subject, email_body, email_attachment, email_confirm],
+                    outputs=email_out,
+                )
 
             # --- Tab 5: 系统信息 ---
             with gr.Tab("系统信息"):

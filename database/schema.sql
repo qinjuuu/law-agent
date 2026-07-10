@@ -508,6 +508,25 @@ CREATE TABLE IF NOT EXISTS trap_kb (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE INDEX idx_trap_industry ON trap_kb(industry);
 
+-- 36. 邮件发送日志
+CREATE TABLE IF NOT EXISTS email_logs (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT,
+    message_id      INT,
+    from_email      VARCHAR(200),
+    to_email        VARCHAR(200) NOT NULL,
+    subject         VARCHAR(500),
+    body_preview    TEXT,
+    attachments     TEXT,
+    attachment_count INT DEFAULT 0,
+    status          VARCHAR(20) DEFAULT 'pending',
+    error_message   TEXT,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE INDEX idx_email_to ON email_logs(to_email);
+CREATE INDEX idx_email_status ON email_logs(status);
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ================================================================
