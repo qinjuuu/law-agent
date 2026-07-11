@@ -138,11 +138,16 @@ def send_email(
             msg.attach(part)
 
         # 发送
+        # 端口465用 SMTP_SSL（隐式SSL），端口587等用 SMTP+STARTTLS（显式SSL）
         context = ssl.create_default_context()
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        if SMTP_PORT == 465:
+            server = smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context)
+        else:
+            server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
             server.ehlo()
             server.starttls(context=context)
             server.ehlo()
+        with server:
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.sendmail(SMTP_USER, to_email, msg.as_string())
 

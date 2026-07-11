@@ -29,3 +29,7 @@ workspace/
 
 # 模型缓存
 .cache/
+
+# 测试输出文件
+test_*.txt
+test_*.json
